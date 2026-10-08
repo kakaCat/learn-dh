@@ -1,0 +1,18 @@
+{
+  "name": "lesson-02-inject",
+  "version": "0.1.0",
+  "description": "Lesson 2: Dependency Injection",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "order": "tsx src/order-demo.ts"
+  },
+  "dependencies": {
+    "@cordisjs/core": "^4.0.0-beta.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

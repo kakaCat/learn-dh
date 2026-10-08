@@ -1,0 +1,17 @@
+{
+  "name": "blog-14-subagent",
+  "version": "0.1.0",
+  "description": "Blog 15: subagent domain - Delegation and Child Agents",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/main.ts"
+  },
+  "dependencies": {
+    "@cordisjs/core": "^4.0.0-beta.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}

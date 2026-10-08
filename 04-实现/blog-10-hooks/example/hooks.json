@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/scripts/notify.sh", "timeout": 30 }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/scripts/notify.sh", "timeout": 30 }
+        ]
+      }
+    ]
+  }
+}

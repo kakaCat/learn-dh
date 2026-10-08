@@ -1,0 +1,18 @@
+{
+  "name": "lesson-07-llm",
+  "version": "0.1.0",
+  "description": "Lesson 7: LLM Adapter",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/main.ts",
+    "stream": "tsx src/stream-demo.ts"
+  },
+  "dependencies": {
+    "@cordisjs/core": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
+  }
+}
