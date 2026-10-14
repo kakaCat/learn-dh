@@ -1,0 +1,83 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "TechArticle",
+      "@id": "{{PUBLISH_URL}}#article",
+      "headline": "从零给 DSH 写一个 Webhook 通知插件",
+      "description": "插件怎么嵌进 DSH、用了哪些能力、为什么这样分层，以及逐文件实现——附取自 dsh-session 真实 .d.ts 的事件签名与字段。",
+      "inLanguage": "zh-CN",
+      "datePublished": "2026-08-20",
+      "dateModified": "2026-10-08",
+      "author": {
+        "@type": "Person",
+        "name": "learn-dh"
+      },
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{PUBLISH_URL}}"
+      },
+      "about": [
+        "DSH 插件开发",
+        "Cordis",
+        "Webhook 通知",
+        "session/event"
+      ],
+      "proficiencyLevel": "Intermediate",
+      "dependencies": "@deepseek-ai/cordis@4.0.4, @deepseek-ai/dsh-session@0.2.0-rc.2"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "{{PUBLISH_URL}}#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "怎么确认插件真的装进 DSH 了？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "分三层确认：1) 装没装——看 profile 的 package.json：dependencies 里有它、dsh.profile.bundles 也列出它，两处必须同时有；2) 装载没装载——重启 Host 后 Host 日志出现插件自己的激活行；3) 客户端半——刷新页面后设置里出现插件面板。注意 $DSH_HOME/logs/startup-*.log 是启动失败报告，不是日志流。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "多个 bundle 都 insert 同一个 id 会怎样？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "不报错、也不会加载两次：Loader 用 store[id] 复用同一条条目，配置按 id 收敛，后者静默覆盖前者。最典型症状是按 id 改了 config 却不生效。建议用带前缀的全局唯一 id（如 dsh-notice-webhook）。不写 id 时 Loader 会自动生成随机 id 并循环避让，反而安全。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "webhook 没收到通知，该从哪几个点排查？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "顺着数据流查六个环节：1) 插件是否激活；2) 事件是否到达（监听 session/event）；3) 是否被规则挡掉（events 订阅、minLevel 闸门、冷却）；4) 是否发出（服务层发送成功/失败日志）；5) 出站是否被拦（超时、3xx 视为失败、Content-Type）；6) 接收端是否认。最快的方法是先用本地接收端（python3 起一个 HTTP 服务）把“发出去了”和“被接受了”分开。"
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "{{PUBLISH_URL}}#breadcrumb",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "learn-dh",
+          "item": "{{REPO_URL}}"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "教学博客",
+          "item": "{{REPO_URL}}/tree/main/04-%E5%AE%9E%E7%8E%B0"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "从零给 DSH 写一个 Webhook 通知插件"
+        }
+      ]
+    }
+  ]
+}

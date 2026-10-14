@@ -1,0 +1,49 @@
+# learn-dh
+
+> 从零实现一个简略版 DeepSeek Harness（DSH）的学习仓库：Cordis 基础笔记、核心模块笔记、执行流程，以及 22 篇「从 0 开始实现」教学博客，每篇都配可运行代码。
+> 事实以真实 DSH 源码 / 已发布 npm 包的 .d.ts 为准，文末给出出处。
+
+## 教学博客（04-实现/）
+
+- [DeepSeek Harness 从 0 开始：Cordis 核心概念入门](04-实现/blog-01-core-concepts/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第一篇：理解 Context 容器、插件的三种形态（函数 / 对象 / 类），以及如何用 ctx.provide() 注册服务。
+- [DeepSeek Harness 从 0 开始：依赖注入与服务管理](04-实现/blog-02-dependency-injection/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第二篇：用 Service 基类和 inject 声明依赖，让 Cordis 自动按依赖顺序激活服务，以及可选依赖（? 前缀）的用法。
+- [DeepSeek Harness 从 0 开始：事件系统](04-实现/blog-03-event-system/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第三篇：Cordis 事件系统的五种派发模式（emit / parallel / serial / bail / waterfall）、
+- [DeepSeek Harness 从 0 开始：Session 模块（事件日志）](04-实现/blog-04-session/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第四篇：Session 模块——append-only 事件日志系统，从事件流投影 LLM 消息 Surface，以及 Fork、重放、
+- [DeepSeek Harness 从 0 开始：Tools 模块（工具注册与执行）](04-实现/blog-05-tools/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第五篇：Tools 模块——工具注册（effect 自动清理）、OpenAI 格式 Schema 生成、以及三段 waterfall 执
+- [DeepSeek Harness 从 0 开始：Inbox 模块（消息队列）](04-实现/blog-06-inbox/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第六篇：Inbox 模块——消息队列，支持优先级排序、失败重试、批量处理与状态管理，为 Agent Loop 的输入调度打基础。
+- [DeepSeek Harness 从 0 开始：Loop 模块（Agent 执行循环）](04-实现/blog-07-loop/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第七篇：Loop 模块——按 dsh 源码实现 ReactLoopAgent（kick/turn/step 状态机）、Inbox 双队列
+- [DeepSeek Harness 从 0 开始：Compaction 模块（上下文压缩）](04-实现/blog-08-compaction/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第八篇：Compaction 模块——按 dsh 源码实现上下文压缩：tool-pairing 平衡切点、区域选择、结构化摘要、surf
+- [DeepSeek Harness 从 0 开始：System Prompt 模块（提示词组装）](04-实现/blog-09-system-prompt/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第九篇：System Prompt 模块——按 dsh 源码实现提示词组装：有序片段注册、变量插值、动态上下文、工具 schema 提供
+- [DeepSeek Harness 从 0 开始：Hooks 模块（钩子协议）](04-实现/blog-10-hooks/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十篇：Hooks 模块——以「框架 ↔ hooks 插件」通信链路为主线，讲清框架侧发事件、hooks 插件侧收事件执行命令、matc
+- [DeepSeek Harness 从 0 开始：LLM 模块（适配器与流式调用）](04-实现/blog-11-llm/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十一篇：LLM 模块——按 dsh 源码实现适配器抽象（LlmAdapter）、适配器注册表（LlmRuntime）、llm/stre
+- [DeepSeek Harness 从 0 开始：Guard 模块（策略守卫）](04-实现/blog-12-guard/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十二篇：Guard 模块——按 dsh 源码实现策略守卫：工具调用超时（TOOL_TIMEOUT 结构化结果）、重复调用提醒（连续相同
+- [DeepSeek Harness 从 0 开始：Persistence 模块（会话持久化）](04-实现/blog-12-persistence/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的补充篇：Persistence 模块——按 dsh 源码实现会话持久化：SessionPersistence 抽象、JSONL 文件后端
+- [DeepSeek Harness 从 0 开始：interaction 域（权限预设 + 审批 + 用户提问）](04-实现/blog-13-interaction/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十三篇：interaction 域——按 dsh 源码实现审批通道（user-approval：ask/never、answerer 
+- [DeepSeek Harness 从 0 开始：subagent 域（子代理委托）](04-实现/blog-14-subagent/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十四篇：subagent 域——按 dsh 源码实现子代理委托：通过工具创建子代理（ctx.agents.create 同进程新 Ag
+- [DeepSeek Harness 从 0 开始：schedule 域（定时任务）](04-实现/blog-15-schedule/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十五篇：schedule 域——按 dsh 源码实现基于 Session 日志的定时提醒：schedule/change 事件（cre
+- [DeepSeek Harness 从 0 开始：scope 域（作用域隔离）](04-实现/blog-16-scope/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十六篇：scope 域——按 dsh 源码实现作用域隔离：createScope 作用域上下文、scopeTarget 事件路由（向上
+- [DeepSeek Harness 从 0 开始：plan 域（计划模式）](04-实现/blog-17-plan/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十七篇：plan 域——按 dsh 源码实现计划模式：plan/mode 事件（log-only，重放日志恢复）、idle 回合机制（
+- [DeepSeek Harness 从 0 开始：todo 任务记忆](04-实现/blog-18-todo/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十八篇：todo 域——按 dsh 源码实现 todo_write 工具：整表替换、todo/write 事件（off the mod
+- [DeepSeek Harness 从 0 开始：jobs 后台任务](04-实现/blog-19-jobs/blog.md): 基于 Cordis 框架从 0 开始实现简略版 DeepSeek Harness 的第十九篇：jobs 域——后台任务协议：把执行从模型回合里拆出来。生命周期 running 到 stopping 到终态、增量读 job
+- [DeepSeek Harness 从 0 开始：20 goal模式](04-实现/blog-20-goal/blog.md): 第二十篇：goal 主题。以 goal 的能力为轴讲清六个关键节点——① 设置目标（create_goal 写 goal/change 事件）② 读状态（会话日志严格重放派生，不是存的）③ 修改状态（CAS 修订 + 执行时授权）④ 轮数预算（只计 goal source 的目标轮）⑤ 判断完成（phase → disarm）⑥ 发起下一轮（续跑，goal 最重要的能力，执行者是独立的 goal-round-driver 包）。含可运行代码与真实运行输出；深挖见 blog-21（derive 引擎）与 blog-22（driver 完整实现）。
+- [DeepSeek Harness 从 0 开始：goal 的 derive 引擎（投影与严格重放）](04-实现/blog-21-goal-derive/blog.md): blog-20-goal 的深挖篇：会话日志是唯一真源，当前目标是「派生」出来的——纯折叠 fold.ts 的五类严格校验、投影单元 GoalProjectionState 的 fail-soft 与 wire 视图裁剪、SessionProjectionRegistry 的懒建 cell、水位、Object.is 闸门与检查点恢复读阶梯。本篇无独立 src/，可运行代码沿用 blog-20-goal。
+- [从零给 DSH 写一个 Webhook 通知插件](04-实现/blog-notice-webhook/blog.md): 从 DSH 插件怎么嵌进宿主讲起，再讲用了 DSH 的哪些能力、分层原理，最后逐文件实现一个可复制的 Webhook 通知插件。
+
+## 学习笔记
+
+- [Cordis 插件系统](01-cordis基础/01-插件系统.md)
+- [Cordis 依赖注入](01-cordis基础/02-依赖注入.md)
+- [Cordis 事件系统](01-cordis基础/03-事件系统.md)
+- [Cordis 控制流深度解析](01-cordis基础/04-控制流实现.md)
+- [Session 模块](02-核心模块/01-session模块.md)
+- [Tools 模块](02-核心模块/02-tools模块.md)
+- [System Prompt 模块](02-核心模块/03-system-prompt模块.md)
+- [Agent Loop 模块](02-核心模块/04-agent-loop模块.md)
+- [Context 压缩模块（未实现）](02-核心模块/05-压缩模块.md)
+- [Hooks 模块（未实现）](02-核心模块/06-hooks模块.md)
+- [Turn Flow - 完整执行流程](03-执行流程/01-turn-flow.md)
+
+## 说明
+
+- 每篇博客目录下都有 `src/`（可运行代码）与 `README.md`（如何跑）。
+- 最完整的一篇：`04-实现/blog-notice-webhook/blog.md`（DSH 插件怎么嵌进宿主 / 用什么 / 为什么 / 逐文件实现）。

@@ -1,0 +1,5 @@
+# macOS 元数据
+.DS_Store
+
+# 依赖目录：可由 package.json / pnpm-lock.yaml 复现，不入库
+node_modules/

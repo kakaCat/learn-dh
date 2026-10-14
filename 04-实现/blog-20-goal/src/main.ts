@@ -12,6 +12,8 @@
  *   tools.ts       ToolRegistry（dsh-tools）
  *   tool-goal.ts   get_goal/create_goal/update_goal（tool-goal/src/index.ts）
  *
+ * 演示主线（Part 0）：goal 的关键节点——① 设置目标 / ② 读状态 / ③ 修改状态 / ④ 轮数预算 / ⑤ 判断完成 / ⑥ 发起下一轮（续跑）。
+ *
  * 核心机制（dsh README）：
  * - 事件溯源：每次变更写 durable goal/change 事件（完整快照或墓碑）
  * - CAS 修订栅栏：只接受精确 id/revision，过期 ref 拒绝
@@ -72,47 +74,60 @@ async function goalRound(agent: Agent, fn: () => Promise<unknown>): Promise<unkn
   try { return await fn() } finally { agent.endTurn() }
 }
 
-// ---- Part 0: 完整案例——driver 自动续跑 ----
-part('Part 0: 完整案例——用户请求 → driver 自动续跑 → complete')
+// ---- Part 0: goal 的能力与关键节点（续跑是最重要的能力） ----
+part('Part 0: goal 的关键节点——① 设置目标 → ② 读状态 → ③ 修改状态 → ⑥ 发起下一轮（续跑）→ ⑤ 判断完成')
 
 const main = ctx.agents.create('main-1')
 const driver = new GoalRoundDriver(ctx)
 
 await humanTurn(main, '帮我写一个博客系列，从 0 实现 DeepSeek Harness，每篇讲一个主题', async () => {
   log('\n👤 用户（直接人类轮次）: "帮我写一个博客系列…"')
-  log('🤖 模型: 这是长目标，创建 goal')
+  log('【节点 ① · 设置目标】模型判断这是长目标 → create_goal(objective, max_goal_rounds)')
   const created = await ctx.tools.invoke('create_goal', {
     objective: '写博客系列：从 0 实现 DeepSeek Harness，每篇一个主题',
     max_goal_rounds: 3,
   }, { agent: main })
-  show('create_goal →', created)
+  show('  create_goal →', created)
+  log('  → 目标写进会话日志：goal/change(create, revision 1)，activation=armed')
   return created
 })
 
-// driver 自动发起每一轮（agent 静默后 schedule），直到无事可做
+// 续跑：goal 最重要的能力。执行者是 driver（独立包）；这里手动 schedule 模拟"agent 变 idle"
 const topics = ['loop', 'session', 'tool']
 let written = 0
 for (;;) {
-  const next = driver.schedule(main)     // 检查 active + armed + 预算
-  if (next === undefined) break          // 目标 complete / blocked / 预算耗尽 → 停止
-  await goalRound(main, async () => {    // 发起一轮
-    log(`\n（driver 自动发起 Round ${next.round}）模型工作：写第 ${next.round} 篇（主题：${topics[written] ?? '…'}）`)
+  log('\n【节点 ② · 读状态】轮次结束、agent 变 idle → 读状态走同一条链：日志 → 折叠 → 视图')
+  const before = ctx.goals.get(main) as any
+  log('【节点 ⑥ · 发起下一轮】续跑第 1 步 · 状态判断：active + armed + 预算有余量？')
+  const next = driver.schedule(main)     // 读派生状态 + 检查 active/armed/预算
+  if (next === undefined) {              // 目标 complete / blocked / 预算耗尽 → 停止
+    const now = ctx.goals.get(main) as any
+    log(`  → ${now === undefined ? '无目标' : `phase=${now.phase}、activation=${now.activation}`} → 不发起，续跑结束`)
+    break
+  }
+  log(`  → phase=active、activation=armed、roundsStarted ${before.roundsStarted}/${before.maxGoalRounds} 尚有余量 → 允许发起 Round ${next.round}`)
+
+  log('【节点 ⑥ · 发起下一轮】续跑第 2 步 · 生成提示词：renderGoalRoundPrompt(goal, round)')
+  for (const line of next.prompt.split('\n')) log(`    | ${line}`)
+
+  await goalRound(main, async () => {    // 续跑第 3 步：投递（goalRound 写入 goal source 消息）
+    log(`【节点 ⑥ · 发起下一轮】续跑第 3 步 · 投递：user/message（source: goal, round ${next.round}）→ 准入 → roundsStarted=${next.round}（节点 ④ 预算 -1）`)
+    log(`  （模型在这一轮里干活：写第 ${next.round} 篇，主题 ${topics[written]}）`)
+    log('【节点 ③ · 修改状态】模型每轮先 get_goal，读精确 id/revision')
     const g = await ctx.tools.invoke('get_goal', {}, { agent: main })
-    show('get_goal →', g)
+    show('  get_goal →', g)
     written += 1
     if (written >= 3) {
-      log('  （写完全部 3 篇，模型认为目标已达成）')
+      log('【节点 ③ · 修改状态】模型判断目标达成 → update_goal(complete)（CAS：带精确 id/revision）')
       const v = ctx.goals.get(main) as any
       const done = await ctx.tools.invoke('update_goal', {
         goal_id: v.id, revision: v.revision, action: 'complete',
       }, { agent: main })
-      show('update_goal complete →', done)
+      show('  update_goal complete →', done)
     }
   })
 }
-// 目标 complete 后 driver 不再发起
-const after = driver.schedule(main)
-log(`\n目标已 complete → driver 不再发起（schedule 返回 ${JSON.stringify(after)}）`)
+log('\n【节点 ⑤ · 判断完成】目标已 complete 并 disarm → driver 判定"无事可做"，续跑停止')
 
 // ---- Part 1: create 与 get_goal 的细节 ----
 part('Part 1: create 与 get_goal——状态与激活')
@@ -238,22 +253,34 @@ await humanTurn(g6, '升级 CI 到 GitHub Actions', async () => {
   return next
 })
 
-// ---- Part 7: blocked——阻塞与恢复 ----
-part('Part 7: blocked——带 blocked_reason 的阻塞（阈值 + 恢复）')
+// ---- Part 7: blocked——阈值边界与恢复 ----
+part('Part 7: blocked——阈值边界（第 2 轮被拒、第 3 轮允许）+ 恢复')
 
 const g7 = ctx.agents.create('g7')
 await humanTurn(g7, '把用户反馈分类器接到生产环境', async () => {
   const created = await ctx.tools.invoke('create_goal', { objective: '上线反馈分类器', max_goal_rounds: 6 }, { agent: g7 })
   show('create_goal →', created)
 })
-// 三个轮次里模型都遇到同一个阻塞条件（还差一个审批）
-for (let round = 1; round <= 3; round++) {
-  await goalRound(g7, async () => {
-    log(`（目标轮 ${round}）模型工作：准备上线，但缺少审批人回复`)
-  })
-}
+// 门槛 = 当前目标轮号（roundsStarted）≥ 3；第 1 轮只工作
 await goalRound(g7, async () => {
-  log('（目标轮 4）模型尝试报 blocked')
+  log('（目标轮 1）模型工作：准备上线，但缺少审批人回复')
+})
+// 第 2 轮：尝试早报 → 门槛拒绝（roundsStarted=2 < 3）
+await goalRound(g7, async () => {
+  log('（目标轮 2）模型尝试报 blocked')
+  const v = ctx.goals.get(g7) as any
+  try {
+    await ctx.tools.invoke('update_goal', {
+      goal_id: v.id, revision: v.revision, action: 'blocked', blocked_reason: '审批人未回复',
+    }, { agent: g7 })
+    log('  ❌ 第 2 轮报 blocked 成功？（不该发生）')
+  } catch (error: any) {
+    log(`  ❌ 第 2 轮报 blocked 被拒 → ${error.message}`)
+  }
+})
+// 第 3 轮：roundsStarted=3 ≥ blockedAfterConsecutiveRounds(3) → 允许
+await goalRound(g7, async () => {
+  log('（目标轮 3）模型再报 blocked → 门槛达标，允许')
   const v = ctx.goals.get(g7) as any
   const blocked = await ctx.tools.invoke('update_goal', {
     goal_id: v.id, revision: v.revision, action: 'blocked', blocked_reason: '审批人在三个轮次中均未回复，无法继续',
